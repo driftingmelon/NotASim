@@ -25,7 +25,8 @@ function draw() {
   let boxH = height * 0.9;
 
   stroke(80);
-  //line(halfW, 0, halfW, height);
+  // 中心分割线暂时隐藏（你之前注释掉了）
+  // line(halfW, 0, halfW, height);
 
   drawModifiedGrid();
 
@@ -40,7 +41,19 @@ function draw() {
   pop();
 
   drawCenterDoor(halfW, height);
+
+  // 单独绘制粒子（放 door 之后以便粒子在前）
   drawFloatingSymbols();
+
+  // 左上角全屏提示（半透明）
+  push();
+  fill(255, 60);
+  noStroke();
+  textSize(13);
+  textAlign(LEFT, TOP);
+  text("⋆˖⁺‧₊click to enter full screen mode", 50, 36);
+  text("₊‧⁺˖⋆☽◯☾ ESC to exit₊‧⁺˖⋆", 50, 66);
+  pop();
 
   noStroke();
   fill(255, 80 + 50 * sin(t * 2));
@@ -51,7 +64,9 @@ function draw() {
   t += camSpeed;
 }
 
-// ---- 网格 ----
+/* ---------------------
+   网格
+--------------------- */
 function drawModifiedGrid() {
   push();
   stroke(140, 140, 140, 35);
@@ -89,7 +104,9 @@ function drawModifiedGrid() {
   pop();
 }
 
-// ---- 中心门 ----
+/* ---------------------
+   中心门（带小白色光晕），门高度1/4且会远离鼠标
+--------------------- */
 function drawCenterDoor(midX, h) {
   push();
   let mouseVec = createVector(mouseX, mouseY);
@@ -111,66 +128,128 @@ function drawCenterDoor(midX, h) {
   translate(doorPos.x + moveX, doorPos.y + moveY);
   scale(scalePulse);
 
-  let ctx = drawingContext; 
-  let radius = max(doorW, doorH) * 0.5;
+  // 白色光晕（较小且透明）
+  let ctx = drawingContext;
+  let radius = max(doorW, doorH) * 0.45;
   let gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
   gradient.addColorStop(0, 'rgba(255,255,255,0.12)');
-  gradient.addColorStop(0.3, 'rgba(255,255,255,0.06)');
+  gradient.addColorStop(0.4, 'rgba(255,255,255,0.05)');
   gradient.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = gradient;
   noStroke();
   ellipse(0, 0, radius * 2);
 
+  // 门线框
   stroke(255);
-  strokeWeight(1);
+  strokeWeight(1.5);
   noFill();
   rect(0, 0, doorW, doorH, 6);
 
+  // 把手：小圆点（左侧）
   noStroke();
   fill(255);
-  ellipse(doorW / 2 - 8, 0, 8);
+  ellipse(-doorW / 2 + 10, 0, 6);
+
+  // clear canvas shadow settings (safety)
+  drawingContext.shadowBlur = 0;
+  drawingContext.shadowColor = 'rgba(0,0,0,0)';
+
   pop();
 }
 
-// ---- 发光粒子系统 ----
+/* ---------------------
+   发光粒子（符号）系统
+   鼠标点击任意屏幕位置都会在该位置生成粒子（修复过只在右半边的 bug）
+   发光效果采用左右两个小“光球”而非单一圆片
+--------------------- */
 function drawFloatingSymbols() {
   for (let i = floatingSymbols.length - 1; i >= 0; i--) {
     let s = floatingSymbols[i];
+
+    // dynamics
     s.angle += s.speed;
-    s.radius += 0.5;
+    s.radius += 0.6;
     s.alpha -= 6;
 
+    // position
     let sx = s.x + cos(s.angle) * s.radius;
     let sy = s.y + sin(s.angle) * s.radius - s.radius * 0.3;
 
+    // neon-ish twin glow (two small orbs left/right)
     noStroke();
-    fill(s.color.levels[0], s.color.levels[1], s.color.levels[2], s.alpha * 0.3);
-    ellipse(sx - 4, sy, 6);
-    ellipse(sx + 4, sy, 6);
+    // lighter, more neon-like low-alpha outer glow
+    fill(red(s.color), green(s.color), blue(s.color), s.alpha * 0.18);
+    ellipse(sx - 5, sy, s.glowSize);
+    ellipse(sx + 5, sy, s.glowSize);
 
-    fill(s.color.levels[0], s.color.levels[1], s.color.levels[2], s.alpha);
-    textSize(18);
+    // core bright spot
+    fill(red(s.color), green(s.color), blue(s.color), s.alpha * 0.9);
+    ellipse(sx - 5, sy, s.coreSize);
+    ellipse(sx + 5, sy, s.coreSize);
+
+    // symbol text (slightly glowing)
+    push();
+    translate(sx, sy);
+    drawingContext.shadowBlur = 12;
+    drawingContext.shadowColor = s.color.toString();
+    fill(red(s.color), green(s.color), blue(s.color), s.alpha);
+    textSize(s.textSize);
     textAlign(CENTER, CENTER);
-    text(s.char, sx, sy);
+    text(s.char, 0, 0);
+    pop();
 
-    if (s.alpha <= 0) floatingSymbols.splice(i, 1);
+    // cleanup shadow
+    drawingContext.shadowBlur = 0;
+
+    if (s.alpha <= 0) {
+      floatingSymbols.splice(i, 1);
+    }
   }
 }
 
-function mousePressed() {
-  for (let i = 0; i < 3; i++) { 
+/* spawn helper */
+function spawnSymbolsAt(x, y, count = 3) {
+  for (let i = 0; i < count; i++) {
     let c = random(symbols);
-    let col = color(random(180, 255), random(100, 255), random(180, 255));
+    // more neon palette (HSL-ish via RGB selection)
+    let col = color(random(120, 255), random(80, 255), random(140, 255));
     floatingSymbols.push({
       char: c,
-      x: mouseX,
-      y: mouseY,
-      radius: random(10, 20),
+      x: x,
+      y: y,
+      radius: random(8, 18),
       angle: random(TWO_PI),
       alpha: 220,
-      speed: random(0.04, 0.08),
-      color: col
+      speed: random(0.04, 0.09),
+      color: col,
+      glowSize: random(18, 38),
+      coreSize: random(6, 12),
+      textSize: random(16, 22)
     });
+  }
+}
+
+/* mouse: try enter fullscreen (or re-enter after exit) and spawn particles */
+function mousePressed() {
+  // attempt to enter fullscreen when not already (this will work repeatedly after user exits)
+  // note: fullscreen() is a p5 DOM helper that must be called on user gesture
+  if (!fullscreen()) {
+    try {
+      fullscreen(true);
+    } catch (e) {
+      // some browsers may reject but this is safe to ignore
+    }
+  }
+  // Always spawn particles at click position (fix: uses mouseX/mouseY directly)
+  spawnSymbolsAt(mouseX, mouseY, 3);
+}
+
+/* allow ESC to exit fullscreen explicitly */
+function keyPressed() {
+  if (keyCode === ESCAPE) {
+    try {
+      fullscreen(false);
+    } catch (e) {}
   }
 }
 
