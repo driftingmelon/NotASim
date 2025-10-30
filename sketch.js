@@ -24,8 +24,7 @@ function draw() {
   let boxW = halfW * 0.9;
   let boxH = height * 0.9;
 
-  stroke(80);
-  // 中心分割线暂时隐藏（你之前注释掉了）
+  stroke(80)
   // line(halfW, 0, halfW, height);
 
   drawModifiedGrid();
@@ -42,7 +41,7 @@ function draw() {
 
   drawCenterDoor(halfW, height);
 
-  // 单独绘制粒子（放 door 之后以便粒子在前）
+  // 单独绘制粒子
   drawFloatingSymbols();
 
   // 左上角全屏提示（半透明）
@@ -105,7 +104,7 @@ function drawModifiedGrid() {
 }
 
 /* ---------------------
-   中心门（带小白色光晕），门高度1/4且会远离鼠标
+   中心门
 --------------------- */
 function drawCenterDoor(midX, h) {
   push();
@@ -128,7 +127,7 @@ function drawCenterDoor(midX, h) {
   translate(doorPos.x + moveX, doorPos.y + moveY);
   scale(scalePulse);
 
-  // 白色光晕（较小且透明）
+  // 白色光晕
   let ctx = drawingContext;
   let radius = max(doorW, doorH) * 0.45;
   let gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
@@ -145,7 +144,7 @@ function drawCenterDoor(midX, h) {
   noFill();
   rect(0, 0, doorW, doorH, 6);
 
-  // 把手：小圆点（左侧）
+  // 把手
   noStroke();
   fill(255);
   ellipse(-doorW / 2 + 10, 0, 6);
@@ -159,8 +158,6 @@ function drawCenterDoor(midX, h) {
 
 /* ---------------------
    发光粒子（符号）系统
-   鼠标点击任意屏幕位置都会在该位置生成粒子（修复过只在右半边的 bug）
-   发光效果采用左右两个小“光球”而非单一圆片
 --------------------- */
 function drawFloatingSymbols() {
   for (let i = floatingSymbols.length - 1; i >= 0; i--) {
@@ -253,7 +250,7 @@ function keyPressed() {
   }
 }
 
-// ---- 第一视角莫比乌斯 ----
+// ---- 第一视角 ----
 function drawMobiusFirst(w, h) {
   let num = 300;
   let R = w / 3;
@@ -289,7 +286,7 @@ function drawMobiusFirst(w, h) {
   ellipse(px, py, 8);
 }
 
-// ---- 第三视角莫比乌斯 ----
+// ---- 第三视角 ----
 function drawMobiusThird(w, h) {
   let num = 400;
   let R = w / 3;
