@@ -46,7 +46,7 @@ function draw() {
   fill(255, 80 + 50 * sin(t * 2));
   textAlign(CENTER, CENTER);
   textSize(16);
-  text("The Ouroboros Drive — First / Third", width / 2, height - 30);
+  text("(Not) A Sim — First / Third", width / 2, height - 30);
 
   t += camSpeed;
 }
