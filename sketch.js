@@ -4,7 +4,7 @@ let camSpeed = 0.01;
 let doorPos, doorTarget;
 let doorW = 80, doorH;
 let floatingSymbols = [];
-let symbols = ["∞", "1", "$","☽", "☾", "✦", "0", "ꨄ︎99+"];
+let symbols = ["∞", "1", "$","☽", "☾", "✦", "0", "ꨄ︎"];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -25,7 +25,7 @@ function draw() {
   let boxH = height * 0.9;
 
   stroke(80);
-  line(halfW, 0, halfW, height);
+  //line(halfW, 0, halfW, height);
 
   drawModifiedGrid();
 
@@ -46,7 +46,7 @@ function draw() {
   fill(255, 80 + 50 * sin(t * 2));
   textAlign(CENTER, CENTER);
   textSize(16);
-  text("(Not) A Sim — First / Third", width / 2, height - 30);
+  text("(Not) A Sim — Micro / Macro", width / 2, height - 30);
 
   t += camSpeed;
 }
@@ -122,13 +122,13 @@ function drawCenterDoor(midX, h) {
   ellipse(0, 0, radius * 2);
 
   stroke(255);
-  strokeWeight(2);
+  strokeWeight(1);
   noFill();
   rect(0, 0, doorW, doorH, 6);
 
   noStroke();
   fill(255);
-  ellipse(doorW / 2 - 6, 0, 8);
+  ellipse(doorW / 2 - 8, 0, 8);
   pop();
 }
 
